@@ -4,3 +4,51 @@ anything.
 
 I'll paste webpage source HTML into source.html and then play with selectors in selector_sandbox.py.
 ----------------------------------------------------------------------------------------------------------------------
+
+
+Issues to address with pjsier:
+    1. NEVERMIND - SEE BELOW - No documented times for future meetings (though all past were at 6:30pm)
+    2. NEVERMIND - SEE BELOW - (Related to #1) - Documented times for past meetings are in a pdf behind a link.
+        --> Can I address that somehow? Should I bother?
+    3. Description field - doesn't exist, but could include the date info (January 2019, April 2019, etc.)
+    4. Time is not given except in the minutes of previous meetings; I've hard-coded 6:30PM, and a note in time_notes.
+    5. Location is not given except in the minutes of previous meetings; I've hard-coded location. Is that acceptable?
+
+    For #1 and 2, I think what I'll do is put 6:30PM as the time, but include time_notes indicating uncertainty.
+----------------------------------------------------------------------------------------------------------------------
+
+Gotcha's, to-do, and other things to watch for:
+
+  1. DE-DUPLICATION - Looks like they just post's the year's planned meetings at once in the "Commission Meeting
+     Schedule for 2019" section and don't update it until the following year; but when a meeting has passed, it appears
+     below, in the "Commission Meetings" section, too, which indicates past meetings.
+
+
+
+----------------------------------------------------------------------------------------------------------------------
+
+New files for which I need to run all tests/linting/etc.:
+  Created file: C:\ProgProjects\city-scrapers\tests\files\chi_midway_noise.html
+  Created file: C:\ProgProjects\city-scrapers\city_scrapers\spiders\chi_midway_noise.py
+  Created file: C:\ProgProjects\city-scrapers\tests\test_chi_midway_noise.py
+
+
+
+Run individual test:
+pytest C:\ProgProjects\city-scrapers\tests\test_chi_midway_noise.py
+
+
+Run flake8 (linter):
+flake8 C:\ProgProjects\city-scrapers\city_scrapers\spiders\chi_midway_noise.py
+flake8 C:\ProgProjects\city-scrapers\tests\test_chi_midway_noise.py
+(Probably need to do this for all .py files generated, though it will likely stay just those two)
+
+
+Run isort:
+(Example from contribution guidelines, which will run on whole project):
+isort
+
+
+Run yapf:
+(Example from contribution guidelines, which will run on whole project):
+yapf --in-place --recursive ./city_scrapers/ ./tests/
