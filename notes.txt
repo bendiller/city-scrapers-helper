@@ -4,8 +4,6 @@ anything.
 
 I'll paste webpage source HTML into source.html and then play with selectors in selector_sandbox.py.
 ----------------------------------------------------------------------------------------------------------------------
-
-
 Issues to address with pjsier:
     1. NEVERMIND - SEE BELOW - No documented times for future meetings (though all past were at 6:30pm)
     2. NEVERMIND - SEE BELOW - (Related to #1) - Documented times for past meetings are in a pdf behind a link.
@@ -22,9 +20,6 @@ Gotcha's, to-do, and other things to watch for:
   1. DE-DUPLICATION - Looks like they just post's the year's planned meetings at once in the "Commission Meeting
      Schedule for 2019" section and don't update it until the following year; but when a meeting has passed, it appears
      below, in the "Commission Meetings" section, too, which indicates past meetings.
-
-
-
 ----------------------------------------------------------------------------------------------------------------------
 
 New files for which I need to run all tests/linting/etc.:

@@ -1,0 +1,56 @@
+# -------------------------------------------- PARSING THOUGHTS -------------------------------------------------------
+I've found the following 3 possible source scenarios:
+  1.  Info comes from the "Commission Meeting Schedule for 2019" list (documents meetings scheduled for the year)
+  2a. Info comes from the "Commission Meetings" table (documents meetings that already occurred)
+  2b. Info comes from the last <tr> in the "Commission Meetings" table, which means it's not a proper row but a bunch
+      of <br> lines within the row.
+
+Case #1 and 2(a &b) will be differentiated by a "from_schedule_section" boolean which will change how they're processed.
+
+    def _parse_title(self, item):
+    pass # Not yet known
+
+    def _parse_description(self, item):
+    if from_schedule_section
+        return 'Regular'  # Annual is not differentiated by this code, as it's still a regular meeting.
+    # Further parsing of table data to determine Regular/ Committee (Residential)/ Committee (Executive)/ Special/ etc.
+
+    def _parse_start(self, item, from_schedule_section):
+        # May not need to provide from_schedule_section at all; might just look for the date text regardless
+        # Again, look at chi_pubhealth.py - the _parse_date() method can probably be adapted
+
+        """Parse start datetime as a naive datetime object."""
+        return None
+
+    def _parse_links(self, item):
+        """Parse or generate links."""
+        documents = []
+        # Should pretty much just be able to look for item.xpath('a/@href') or similar, see chi_pubhealth.py
+        return documents
+
+    def _get_status(self):
+        if (self.start > datetime.now()):
+            return TENTATIVE
+        else:
+            return PASSED
+
+
+
+Regarding de-duplication, I THINK something like this would work:
+
+# All meetings are stored on this page, with some duplication, so making a list of them and de-dup'ing is needed:
+# Here's a couple approaches:
+# 1. Fully parse the past ones ("Commission Meetings") first and store Meeting objects in a list.
+# 2. Work through the "Schedule" list and do the following:
+      a. Parse start - if start is in the list of starts found from #1, cease processing this one ('continue')
+      b. Else, finish processing this one
+
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------

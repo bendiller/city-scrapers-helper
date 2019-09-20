@@ -36,4 +36,3 @@ print(f"Number of items matching selector: {len(Selector(text=body).xpath(select
 for item in Selector(text=body).xpath(selector_str):
     print(item.extract())
 
-
