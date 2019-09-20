@@ -14,6 +14,7 @@ with open("source.html", 'r') as f:
 # ------------------------------------------- FUTURE MEETINGS ---------------------------------------------------------
 # This selects the first UL I care about, but also 2 others I don't, and misses one that I do want.
 # selector_str = "//div/div/div/h3/following-sibling::ul"
+# selector_str = "//div/div/div/h3/following-sibling::ul"
 #
 # # Either an extract_first() or narrowing down further might work.
 # first_result = Selector(text=body).xpath(selector_str).extract_first()
@@ -23,13 +24,15 @@ with open("source.html", 'r') as f:
     # This can then be passed over to it's own special parser. I can drop those which are in the past - those will be
     # present in the next section (with the "Commission Meetings" header, that details past meetings).
 
+selector_str = "(//h3/following-sibling::ul)[1]/li/text()"  # This is a MUCH better selector than the previous stuff.
+
 # --------------------------------------------- PAST MEETINGS ---------------------------------------------------------
 
 # This selector works great until the very last row of the table, at which point some lazy web-dev started just using
 # <br> for new meeting entries, rather than <tr> rows. That's going to complicate parsing.
 
 # I think I'll check the contents for <br> and then send them off to a tertiary parser if they contain such.
-selector_str = "//div/div/div/h3/following-sibling::table/tbody/tr"
+# selector_str = "//div/div/div/h3/following-sibling::table/tbody/tr"
 
 print(f"Number of items matching selector: {len(Selector(text=body).xpath(selector_str))}")
 

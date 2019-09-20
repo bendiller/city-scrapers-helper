@@ -1,3 +1,6 @@
+import re
+from datetime import datetime
+
 from scrapy.selector import Selector
 
 from city_scrapers_core.constants import COMMISSION
@@ -19,9 +22,27 @@ class PsuedoSpider:
 
     def parse(self, response):
         meeting_list = []
-        selector_str = "//div/div/div/h3/following-sibling::table/tbody/tr"
+        # Process the meetings presented in the "Commission Meetings" table:
+        # selector_str = "//div/div/div/h3/following-sibling::table/tbody/tr"
+        # for item in Selector(text=response).xpath(selector_str):  # for item in response.xpath(selector_str):
+        #     # print(item.extract())
+        #     meeting = Meeting(
+        #         title=self.title,
+        #         description=self._parse_description(item),
+        #         classification=COMMISSION,
+        #         start=self._parse_start(item),
+        #         end=None,
+        #         all_day=False,
+        #         time_notes="Start times are not explicitly stated, but all observed past meetings occurred at 6:30PM",
+        #         location=self.location,
+        #         links=self._parse_links(item),
+        #         source=self.source,
+        #     )
+        #     meeting_list.append(meeting)
+
+        # Process the meetings presented in the "Commission Meeting Schedule for ..." list:
+        selector_str = "(//h3/following-sibling::ul)[1]/li/text()"
         for item in Selector(text=response).xpath(selector_str):  # for item in response.xpath(selector_str):
-            print(item.extract())
             meeting = Meeting(
                 title=self.title,
                 description=self._parse_description(item),
@@ -54,7 +75,30 @@ class PsuedoSpider:
         return desc
 
     def _parse_start(self, item):
+        datetime_obj = self._parse_date(item)
         pass
+
+    def _parse_date(self, item):
+        """
+        Parse the meeting date.
+        """
+        # Borrowed largely from chi_pubhealth.py
+        # Future meetings are plain text
+        # date_text = item.xpath('//text()').extract_first()
+        date_text = item.xpath('//td/text()').extract_first()  # This will only work for Comission Meetings section
+        # print(date_text)
+        #
+        # if not date_text:
+        #     # Past meetings are links to the agenda
+        #     date_text = item.xpath('a/text()').extract_first()
+
+        # Handle typos like "December18"
+        # if re.match(r'[a-zA-Z]+\d+', date_text):
+        #     date_match = re.search(r'(?P<month>[a-zA-Z]+)(?P<day>\d+)', date_text)
+        #     date_text = '{} {}'.format(date_match.group('month'), date_match.group('day'))
+        # # Extract date formatted like "January 12"
+        # return datetime.strptime(date_text, '%B %d')
+        return None
 
     def _parse_links(self, item):
         """Parse or generate links."""

@@ -8,4 +8,6 @@ spider = PsuedoSpider()
 meetings = spider.parse(body)
 
 for meeting in meetings:
+    pass
     print(meeting)
+    print('\n')
