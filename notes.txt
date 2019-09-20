@@ -1,0 +1,6 @@
+The purpose of this repo is to be used alongside my work to contribute to the "CityScrapers" project, and to provide
+a simple sandbox that lets me test selectors against the HTML source without having to invoke Scrapy or crawl pages or
+anything.
+
+I'll paste webpage source HTML into source.html and then play with selectors in selector_sandbox.py.
+----------------------------------------------------------------------------------------------------------------------
