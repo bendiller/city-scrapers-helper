@@ -23,7 +23,8 @@ class PsuedoSpider:
     def parse(self, response):
         meeting_list = []
         # Process the meetings presented in the "Commission Meetings" table:
-        selector_str = "//div/div/div/h3/following-sibling::table/tbody/tr"
+        selector_str = "//h3/following-sibling::table/tbody/tr"
+        # selector_str = "normalize-space(//h3/following-sibling::table/tbody/tr)"
         for item in Selector(text=response).xpath(selector_str):  # for item in response.xpath(selector_str):
             # print(item.extract())
             if '<br>' in item.extract():  # TODO This one needs special treatment, I'll deal with that later!
@@ -57,7 +58,7 @@ class PsuedoSpider:
                 links=self._parse_links(item),
                 source=self.source,
             )
-            meeting_list.append(meeting)  #T ODO Don't forget the de-duplication of the results of this loop!
+            meeting_list.append(meeting)  # TODO Don't forget the de-duplication of the results of this loop!
 
         yield from meeting_list
 
@@ -78,7 +79,8 @@ class PsuedoSpider:
 
     def _parse_start(self, item):
         datetime_obj = self._parse_date(item)
-        return datetime_obj
+        # return datetime_obj
+        return datetime.now()  # TODO Make sure to resolve this of course
 
     def _parse_date(self, item):
         """
@@ -86,7 +88,10 @@ class PsuedoSpider:
         """
         # Borrowed largely from chi_pubhealth.py
         # Future meetings are plain text
-        date_text = item.xpath('//text()').extract_first()
+        # date_text = item.xpath('//text()').extract_first()
+        print(item)
+        date_text = item.xpath('.//text()').extract()
+        # print(date_text)
         # date_text = item.xpath('//td/text()').extract_first()  # This will only work for Comission Meetings section
         # print(date_text)
         #
@@ -107,3 +112,8 @@ class PsuedoSpider:
         documents = []
         # Should pretty much just be able to look for item.xpath('a/@href') or similar, see chi_pubhealth.py
         return documents
+
+    # def _clean_bad_chars(self, item):
+    #     pass
+    # Now I'm confused because that stopped appearing I think.
+    # Need to do something about '\u200b' showing up everywhere
