@@ -5,9 +5,11 @@ with open("source.html", 'r') as f:
 
 
 spider = PsuedoSpider()
-meetings = spider.parse(body)
+meeting_gen = spider.parse(body)
+meeting_list = [meeting for meeting in meeting_gen]
+print(f"Length of meeting_list: {len(meeting_list)}")
 
-for meeting in meetings:
+for meeting in meeting_list:
     pass
     print(meeting)
     print('\n')
