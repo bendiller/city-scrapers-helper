@@ -7,6 +7,7 @@ from city_scrapers_core.constants import COMMISSION
 from city_scrapers_core.items import Meeting
 
 
+# TODO Remove the print statements and other commented code.
 class PsuedoSpider:
     name = "chi_midway_noise"
     agency = "Chicago Midway Noise Compatibility Commission"
@@ -114,9 +115,6 @@ class PsuedoSpider:
     def _parse_description(self, item):
         if type(item) == Selector:
             item = item.get()
-
-
-        # print(type(item))
         text = self._clean_bad_chars(item)
         desc = ''
         if 'Regular' in text:
@@ -129,7 +127,7 @@ class PsuedoSpider:
                 desc = f"Executive {desc}"
             elif 'Residential' in text:
                 desc = f"Residential {desc}"
-        print(desc)
+        # print(desc)
         return desc
 
     def _parse_start(self, item):
@@ -142,15 +140,19 @@ class PsuedoSpider:
         Parse the meeting date.
         """
         # Borrowed largely from chi_pubhealth.py
-        # Future meetings are plain text
-        # date_text = item.xpath('//text()').extract_first()
-        # print(item)
+        if type(item) == Selector:
+            # Scheduled meetings have only text; past meetings have <td> tags.
+            if '<td>' in item.get():
+                item = item.xpath('.//td/text()').get()
+                # pass # Do further processing
+            else:
+                item = item.get()
+            # item = item.xpath('.//text()').extract()
+            # item = item.xpath('.//td').extract()
 
-
-        # if type(item) == Selector:
-        #     item = item.xpath('.//text()').extract()
+            # print('\n')
         # date_text = self._clean_bad_chars(item)
-
+        print(item)
 
         # print(f"Length: {len(date_text)}")
         # print(date_text)
@@ -170,7 +172,6 @@ class PsuedoSpider:
         return None
         # return date_text
 
-
     def _parse_links(self, item):
         """Parse or generate links."""
         documents = []
@@ -184,21 +185,15 @@ class PsuedoSpider:
         # The first (left-most) <td> contains the <br>-separated list of meeting dates and types.
         # The second (right-most) <td> contains the <br>-separated list of agenda and minutes links.
         tds = item.xpath('.//td')
-        dates_and_types = tds[0].extract().split('<br>')
-        links = tds[1].extract().split('<br>')
-        # zipped = zip(dates_and_types, links)
+        dates_and_types = tds[0].extract().replace('<td>', '').replace('</td>', '').split('<br>')
+        links = tds[1].extract().replace('<td>', '').replace('</td>', '').split('<br>')
 
-        candidates = list()  # Could probably make a list comprehension if I wanted.
+        candidates = list()
         for pair in zip(dates_and_types, links):
             candidates.append({'description': self._parse_description(pair[0]),
                                'start': self._parse_start(pair[0]),
                                'links': self._parse_links(pair[1])})
 
-
-        # print(dates_and_types)
-        # print('------------')
-        # print(links)
-        # print(item.extract())
         return candidates
 
     def _clean_bad_chars(self, text):
