@@ -20,49 +20,6 @@ class PsuedoSpider:
         "address": "6072 S. Archer Ave., Chicago, IL 60638",
     }
     source = "https://www.flychicago.com/community/MDWnoise/AdditionalResources/pages/default.aspx"
-    # TODO Should I replace all instances of extract() and extract_all() with get() and getall()?
-    # def parse(self, response):
-    #     meeting_list = []
-    #     # Process the meetings presented in the "Commission Meetings" table:
-    #     selector_str = "//h3/following-sibling::table/tbody/tr"
-    #     for item in Selector(text=response).xpath(selector_str):  # for item in response.xpath(selector_str):
-    #         # print(item.extract())
-    #         if '<br>' in item.extract():  # TODO This one needs special treatment, I'll deal with that later!
-    #             # This is an odd case that requires special treatment.
-    #             meeting_list.append(self._parse_malformed_row(item))
-    #             continue
-    #         meeting = Meeting(
-    #             title=self.title,
-    #             description=self._parse_description(item),
-    #             classification=COMMISSION,
-    #             start=self._parse_start(item),
-    #             end=None,
-    #             all_day=False,
-    #             time_notes="Start times are not explicitly stated, but all observed past meetings occurred at 6:30PM",
-    #             location=self.location,
-    #             links=self._parse_links(item),
-    #             source=self.source,
-    #         )
-    #         meeting_list.append(meeting)
-    #
-    #     # Process the meetings presented in the "Commission Meeting Schedule for ..." list:
-    #     selector_str = "(//h3/following-sibling::ul)[1]/li/text()"
-    #     for item in Selector(text=response).xpath(selector_str):  # for item in response.xpath(selector_str):
-    #         meeting = Meeting(
-    #             title=self.title,
-    #             description=self._parse_description(item),
-    #             classification=COMMISSION,
-    #             start=self._parse_start(item),
-    #             end=None,
-    #             all_day=False,
-    #             time_notes="Start times are not explicitly stated, but all observed past meetings occurred at 6:30PM",
-    #             location=self.location,
-    #             links=self._parse_links(item),
-    #             source=self.source,
-    #         )
-    #         meeting_list.append(meeting)  # TODO Don't forget the de-duplication of the results of this loop!
-    #
-    #     yield from meeting_list
 
     def parse(self, response):
         # This page contains meetings in two different sections, which are formatted differently and contain some
@@ -74,8 +31,7 @@ class PsuedoSpider:
         # Process the meetings presented in the "Commission Meetings" table:
         selector_str = "//h3/following-sibling::table/tbody/tr"
         for item in Selector(text=response).xpath(selector_str):  # for item in response.xpath(selector_str):
-            # print(item.extract())
-            if '<br>' in item.extract():  # TODO This one needs special treatment, I'll deal with that later!
+            if '<br>' in item.extract():
                 # This is an odd case that requires special treatment. See _parse_malformed_row() for details.
                 candidates.extend(self._parse_malformed_row(item))
                 continue
@@ -96,7 +52,6 @@ class PsuedoSpider:
 
         meeting_list = []
         for elem in candidates:
-            pass
             # Construct Meeting objects:
             meeting = Meeting(
                 title=self.title,
@@ -110,7 +65,7 @@ class PsuedoSpider:
                 links=elem['links'],
                 source=self.source,
             )
-            meeting_list.append(meeting)  # TODO Don't forget the de-duplication of the results of this loop!
+            meeting_list.append(meeting)
 
         yield from meeting_list
 
@@ -129,10 +84,10 @@ class PsuedoSpider:
                 desc = f"Executive {desc}"
             elif 'Residential' in text:
                 desc = f"Residential {desc}"
-        # print(desc)
         return desc
 
     def _parse_start(self, item):
+        """Parse the meeting start time."""
         # No (clock) times are given on the site, but records of past meetings show a consistent 6:30PM start time.
         date = self._parse_date(item)
         if date is None:
@@ -140,94 +95,23 @@ class PsuedoSpider:
         return datetime(date['year'], date['month'], date['day'], 18, 30)
 
     def _parse_date(self, item):
-        """
-        Parse the meeting date.
-        """
+        """Parse the meeting date."""
         if type(item) == Selector:
             # Scheduled meetings have only text; past meetings have <td> tags.
             if '<td>' in item.get():
                 item = item.xpath('.//td/text()').get()
-                # pass # Do further processing
             else:
                 item = item.get()
-            # item = item.xpath('.//text()').extract()
-            # item = item.xpath('.//td').extract()
-
-            # print('\n')
-        # date_text = self._clean_bad_chars(item)
         item = self._clean_bad_chars(item)
-        # print(item)
-
-
-
-        # regex = re.compile(r'(?P<month>[a-zA-Z]+)')
-        # m = regex.search(item)
-        # print(m.group('month'))
-        # print('')
-
         regex = re.compile(r'(?P<month>[a-zA-Z]+) (?P<day>[0-9]+), (?P<year>[0-9]{4})')
         m = regex.search(item)
 
         try:
-            # return int(m.group('month')), int(m.group('day')), int(m.group('year'))
             return {'month': datetime.strptime(m.group('month'), '%B').month,  # This return statement is clunky.
                     'day': int(m.group('day')),
                     'year': int(m.group('year'))}
-        except Exception as e:
-            print(f"EXCEPTION: {item}")
-            print(e)
+        except AttributeError:  # Regex failed to match.
             return None
-
-
-
-        # try:
-        #     print(m.group('month'))
-        # except:
-        #     print(f"EXCEPTION: {m}")
-        #     for c in item:
-        #         print(f"{c}: {ord(c)}")
-        # try:
-        #     print(m.group('day'))
-        # except:
-        #     print(f"EXCEPTION: {m}")
-        #     for c in item:
-        #         print(f"{c}: {ord(c)}")
-        # try:
-        #     print(m.group('year'))
-        # except:
-        #     print(f"EXCEPTION: {m}")
-        #     for c in item:
-        #         print(f"{c}: {ord(c)}")
-        # print('')
-
-
-
-
-        # print(m.group('month'), m.group('year'))
-
-        # Handle typos like "December18"
-        # if re.match(r'[a-zA-Z]+\d+', item):
-        # date_match = re.search(r'(?P<month>[a-zA-Z]+)(?P<day>\d+)', item)
-        # date_text = '{} {}'.format(date_match.group('month'), date_match.group('day'))
-        # print(date_text)
-
-        # print(f"Length: {len(date_text)}")
-        # print(date_text)
-        # date_text = item.xpath('//td/text()').extract_first()  # This will only work for Comission Meetings section
-        # print(date_text)
-        #
-        # if not date_text:
-        #     # Past meetings are links to the agenda
-        #     date_text = item.xpath('a/text()').extract_first()
-
-        # Handle typos like "December18"
-        # if re.match(r'[a-zA-Z]+\d+', date_text):
-        #     date_match = re.search(r'(?P<month>[a-zA-Z]+)(?P<day>\d+)', date_text)
-        #     date_text = '{} {}'.format(date_match.group('month'), date_match.group('day'))
-        # # Extract date formatted like "January 12"
-        # return datetime.strptime(date_text, '%B %d')
-        return None
-        # return date_text
 
     def _parse_links(self, item):
         """Parse or generate links."""
@@ -236,8 +120,9 @@ class PsuedoSpider:
         return documents
 
     def _parse_malformed_row(self, item):
-        # This row breaks from the previous pattern in that it uses <br> tags within <td> cells instead of new <tr> tags
-        # for table rows.
+        """Parse a special case of meeting information."""
+        # This row diverges from the previous pattern in that it uses <br> tags within <td> cells instead of new <tr>
+        # tags for table rows.
 
         # The first (left-most) <td> contains the <br>-separated list of meeting dates and types.
         # The second (right-most) <td> contains the <br>-separated list of agenda and minutes links.
@@ -256,8 +141,3 @@ class PsuedoSpider:
     def _clean_bad_chars(self, text):
         """ Remove unwanted unicode characters (only one found so far). """
         return text.replace(u'\u200b', '')
-
-    # def _clean_bad_chars(self, item):
-    #     pass
-    # Now I'm confused because that stopped appearing I think.
-    # Need to do something about '\u200b' showing up everywhere
