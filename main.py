@@ -18,5 +18,5 @@ print(f"Length of meeting_list: {len(meeting_list)}")
 
 for meeting in meeting_list:
     pass
-    # print(meeting)
-    # print('\n')
+    print(meeting)
+    print('\n')

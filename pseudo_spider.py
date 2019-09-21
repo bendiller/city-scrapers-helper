@@ -86,8 +86,10 @@ class PsuedoSpider:
         # Process the meetings presented in the "Commission Meeting Schedule for ..." list:
         selector_str = "(//h3/following-sibling::ul)[1]/li/text()"
         for item in Selector(text=response).xpath(selector_str):  # for item in response.xpath(selector_str):
-            # Check to see if start date is in the past - if so, skip it because the meeting has been captured above.
             start = self._parse_start(item)
+            if start is None:  # Skip this item if start time could not be determined.
+                continue
+            # Check to see if start date is in the past - if so, skip it because the meeting has been captured above.
             if start < datetime.now():
                 continue
             candidates.append({'description': 'Regular', 'start': start, 'links': []})
@@ -131,15 +133,16 @@ class PsuedoSpider:
         return desc
 
     def _parse_start(self, item):
-        datetime_obj = self._parse_date(item)
-        # return datetime_obj
-        return datetime.now()  # TODO Make sure to resolve this of course
+        # No (clock) times are given on the site, but records of past meetings show a consistent 6:30PM start time.
+        date = self._parse_date(item)
+        if date is None:
+            return None
+        return datetime(date['year'], date['month'], date['day'], 18, 30)
 
     def _parse_date(self, item):
         """
         Parse the meeting date.
         """
-        # Borrowed largely from chi_pubhealth.py
         if type(item) == Selector:
             # Scheduled meetings have only text; past meetings have <td> tags.
             if '<td>' in item.get():
@@ -152,7 +155,61 @@ class PsuedoSpider:
 
             # print('\n')
         # date_text = self._clean_bad_chars(item)
-        print(item)
+        item = self._clean_bad_chars(item)
+        # print(item)
+
+
+
+        # regex = re.compile(r'(?P<month>[a-zA-Z]+)')
+        # m = regex.search(item)
+        # print(m.group('month'))
+        # print('')
+
+        regex = re.compile(r'(?P<month>[a-zA-Z]+) (?P<day>[0-9]+), (?P<year>[0-9]{4})')
+        m = regex.search(item)
+
+        try:
+            # return int(m.group('month')), int(m.group('day')), int(m.group('year'))
+            return {'month': datetime.strptime(m.group('month'), '%B').month,  # This return statement is clunky.
+                    'day': int(m.group('day')),
+                    'year': int(m.group('year'))}
+        except Exception as e:
+            print(f"EXCEPTION: {item}")
+            print(e)
+            return None
+
+
+
+        # try:
+        #     print(m.group('month'))
+        # except:
+        #     print(f"EXCEPTION: {m}")
+        #     for c in item:
+        #         print(f"{c}: {ord(c)}")
+        # try:
+        #     print(m.group('day'))
+        # except:
+        #     print(f"EXCEPTION: {m}")
+        #     for c in item:
+        #         print(f"{c}: {ord(c)}")
+        # try:
+        #     print(m.group('year'))
+        # except:
+        #     print(f"EXCEPTION: {m}")
+        #     for c in item:
+        #         print(f"{c}: {ord(c)}")
+        # print('')
+
+
+
+
+        # print(m.group('month'), m.group('year'))
+
+        # Handle typos like "December18"
+        # if re.match(r'[a-zA-Z]+\d+', item):
+        # date_match = re.search(r'(?P<month>[a-zA-Z]+)(?P<day>\d+)', item)
+        # date_text = '{} {}'.format(date_match.group('month'), date_match.group('day'))
+        # print(date_text)
 
         # print(f"Length: {len(date_text)}")
         # print(date_text)
