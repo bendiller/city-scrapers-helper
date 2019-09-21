@@ -24,7 +24,6 @@ class PsuedoSpider:
         meeting_list = []
         # Process the meetings presented in the "Commission Meetings" table:
         selector_str = "//h3/following-sibling::table/tbody/tr"
-        # selector_str = "normalize-space(//h3/following-sibling::table/tbody/tr)"
         for item in Selector(text=response).xpath(selector_str):  # for item in response.xpath(selector_str):
             # print(item.extract())
             if '<br>' in item.extract():  # TODO This one needs special treatment, I'll deal with that later!
@@ -63,7 +62,7 @@ class PsuedoSpider:
         yield from meeting_list
 
     def _parse_description(self, item):
-        text = item.extract()
+        text = self._clean_bad_chars(item.extract())
         desc = ''
         if 'Regular' in text:
             desc = 'Regular Meeting'
@@ -89,9 +88,11 @@ class PsuedoSpider:
         # Borrowed largely from chi_pubhealth.py
         # Future meetings are plain text
         # date_text = item.xpath('//text()').extract_first()
-        print(item)
+        # print(item)
         date_text = item.xpath('.//text()').extract()
-        # print(date_text)
+        # date_text = self._clean_bad_chars(item.xpath('.//text()').extract())
+        print(f"Length: {len(date_text)}")
+        print(date_text)
         # date_text = item.xpath('//td/text()').extract_first()  # This will only work for Comission Meetings section
         # print(date_text)
         #
@@ -112,6 +113,10 @@ class PsuedoSpider:
         documents = []
         # Should pretty much just be able to look for item.xpath('a/@href') or similar, see chi_pubhealth.py
         return documents
+
+    def _clean_bad_chars(self, text):
+        """ Remove unwanted unicode characters (only one found so far). """
+        return text.replace(u'\u200b', '')
 
     # def _clean_bad_chars(self, item):
     #     pass
