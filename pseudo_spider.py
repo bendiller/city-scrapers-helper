@@ -118,17 +118,10 @@ class PsuedoSpider:
         """Parse or generate links."""
         documents = []
         if type(item) == Selector:
-            # print(item.extract())
             relative_urls = item.xpath('.//a/@href').extract()
             for relative_url in relative_urls:
-                # print(relative_url)
-                # full_url = urljoin('https://' + self.allowed_domains[0], relative_url)
                 documents.append(self._build_full_url(relative_url))
-                # print(full_url)
-            # print('')
         else:
-            # tmp = item.xpath('.//a/@href')
-            # print(tmp)
             elems = item.split(',')
             for elem in elems:
                 regex = re.compile(r'<a href="(?P<url>.*?)"')
@@ -136,27 +129,8 @@ class PsuedoSpider:
                 try:
                     relative_url = m.group('url')
                     documents.append(self._build_full_url(relative_url))
-                    # print(self._build_full_url(relative_url))
-                    # print(relative_url)
                 except AttributeError:
                     continue  # Not a problem, some of these do not contain links.
-                # finally:
-                #     documents.append(self._build_full_url(relative_url))
-                #     print(self._build_full_url(relative_url))
-                # except Exception as e:
-                #     print(f"EXCEPTION: {item}")
-                #     print(e)
-                #     print(type(e))
-                #     continue
-
-                # print(f"Length: {len(item)}")
-            #     print(item)
-            # print('')
-        #
-        # print(item)
-        # for doc in documents:
-        #     print(doc)
-        # print('')
         return documents
 
     def _parse_malformed_row(self, item):
