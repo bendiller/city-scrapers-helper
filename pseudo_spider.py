@@ -14,7 +14,7 @@ class PsuedoSpider:
     agency = "Chicago Midway Noise Compatibility Commission"
     timezone = "America/Chicago"
     allowed_domains = ["www.flychicago.com"]
-    start_urls = ["https://www.flychicago.com"]
+    start_urls = ["https://www.flychicago.com/community/MDWnoise/AdditionalResources/pages/default.aspx"]
     title = "Midway Noise Compatibility Commission Meeting"
     location = {
         "name": "The Mayfield",
