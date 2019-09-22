@@ -1,15 +1,7 @@
 from pseudo_spider import PsuedoSpider
 
 with open("source.html", 'r', encoding='utf-8') as f:
-    # body = f.read().replace(u'\u200b', '')
     body = f.read()
-
-# print(body)
-
-# if u'\u200b' in body:
-#     print(True)
-# else:
-#     print(False)
 
 spider = PsuedoSpider()
 meeting_gen = spider.parse(body)
