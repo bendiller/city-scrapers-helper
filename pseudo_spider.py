@@ -4,7 +4,7 @@ from urllib.parse import urljoin
 
 from scrapy.selector import Selector
 
-from city_scrapers_core.constants import COMMISSION
+from city_scrapers_core.constants import COMMISSION, PASSED, TENTATIVE
 from city_scrapers_core.items import Meeting
 
 
@@ -65,6 +65,7 @@ class PsuedoSpider:
                 location=self.location,
                 links=elem['links'],
                 source=self.source,
+                status=self._parse_status(elem['start'])
             )
             meeting_list.append(meeting)
 
@@ -132,6 +133,17 @@ class PsuedoSpider:
                 except AttributeError:
                     continue  # Not a problem, some of these do not contain links.
         return documents
+
+    def _parse_status(self, start):
+        """Parse scheduling status."""
+        print(f"START TYPE: {type(start)} | START VALUE: {str(start)}")
+        print(f"START TYPE: {type(datetime.now())} | START VALUE: {str(datetime.now())}")
+        print(f"COMPARISON RESULTS: {start > datetime.now()}")
+        print("")
+        if start > datetime.now():
+            return TENTATIVE
+        else:
+            return PASSED
 
     def _parse_malformed_row(self, item):
         """Parse a special case of meeting information."""
